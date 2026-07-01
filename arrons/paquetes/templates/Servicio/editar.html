@@ -1,0 +1,437 @@
+{% extends 'base2.html' %}
+
+{% block content %}
+<style>
+    /* Contenedor Principal de Edición */
+    .edit-service-container {
+        background: white;
+        border-radius: 2rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        overflow: hidden;
+        margin-top: 2rem;
+    }
+
+    /* Cabecera Azul (Coincide con pestaña Servicios) */
+    .edit-service-header {
+        background: #2563eb;
+        padding: 3rem 2rem;
+        color: white;
+        text-align: center;
+        position: relative;
+    }
+
+    .edit-badge {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(4px);
+        padding: 6px 16px;
+        border-radius: 99px;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        font-weight: 900;
+        letter-spacing: 2px;
+        display: inline-block;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Formulario */
+    .edit-form-body {
+        padding: 2.5rem;
+    }
+
+    .section-divider {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #2563eb;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin: 2rem 0 1.2rem 0;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px dashed #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .field-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .label-edit {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.7rem;
+        font-weight: 900;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 0.6rem;
+        letter-spacing: 0.1em;
+    }
+
+    .input-edit-style {
+        width: 100%;
+        padding: 0.9rem 1.2rem;
+        border: 2px solid #f1f5f9;
+        border-radius: 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.3s;
+        color: #1e293b;
+        background: #f8fafc;
+    }
+
+    .input-edit-style:focus {
+        outline: none;
+        border-color: #2563eb;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.06);
+    }
+
+    .input-edit-style:user-invalid {
+        border-color: #ef4444;
+        background-color: #fef2f2;
+    }
+
+    /* Input de Precio Especial */
+    .price-input-container {
+        position: relative;
+    }
+
+    .price-symbol {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 900;
+        color: #94a3b8;
+    }
+
+    .price-input-container input {
+        padding-left: 2.5rem;
+    }
+
+    /* Pie de Formulario */
+    .edit-form-footer {
+        background: #f8fafc;
+        padding: 1.5rem 2.5rem;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 1.5rem;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .btn-update {
+        background: #2563eb;
+        color: white;
+        padding: 0.9rem 2.2rem;
+        border-radius: 9999px;
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-update:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-cancel-edit {
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #94a3b8;
+        transition: 0.2s;
+    }
+
+    .btn-cancel-edit:hover {
+        color: #64748b;
+    }
+
+    .char-counter {
+        font-size: 0.65rem;
+        color: #94a3b8;
+        font-weight: bold;
+        text-transform: none;
+        letter-spacing: normal;
+    }
+
+    .contenedor-main { background: transparent !important; box-shadow: none !important; }
+</style>
+
+<div class="max-w-3xl mx-auto pb-12 px-4">
+    <div id="js-error-container" class="hidden mb-4 p-4 rounded-xl bg-red-50 text-red-700 border border-red-200 text-sm font-bold shadow-sm"></div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mb-4 p-4 rounded-xl {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %} text-sm font-bold shadow-sm">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="edit-service-container animate-in">
+        
+        <div class="edit-service-header">
+            <span class="edit-badge">Editor de Catálogo</span>
+            <h1 class="text-3xl font-black uppercase tracking-tighter italic">Editar Servicio Tercerizado</h1>
+            <div class="mt-4 flex justify-center items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-blue-100">
+                <span class="opacity-60">ID Interno:</span>
+                <span class="bg-white/10 px-2 py-1 rounded-md">{{ servicio.id }}</span>
+            </div>
+        </div>
+
+        <form action="{% url 'editar_servicio' %}" method="POST" id="form-editar-servicio">
+            {% csrf_token %}
+            <input type="hidden" name="txt_id" value="{{ servicio.id }}">
+
+            <div class="edit-form-body">
+                
+                <div class="section-divider" style="margin-top: 0;">
+                    <i class="fa-solid fa-circle-info"></i> Información Comercial
+                </div>
+
+                <div class="field-group">
+                    <label class="label-edit">
+                        <span><i class="fa-solid fa-signature mr-2 text-blue-500"></i> Nombre del Servicio</span>
+                    </label>
+                    <input type="text" 
+                           id="nombre"
+                           name="txt_nombre" 
+                           value="{{ servicio.nombre_servicio }}"
+                           class="input-edit-style" 
+                           placeholder="Ej: Catering Master"
+                           minlength="2"
+                           maxlength="50"
+                           pattern="^[A-Za-záéíóúÁÉÍÓÚñÑ0-9\s]{2,50}$"
+                           title="El nombre debe tener mínimo 2 caracteres (letras, números o espacios)."
+                           required>
+                </div>
+
+                <div class="field-group">
+                    <label class="label-edit">
+                        <span><i class="fa-solid fa-align-left mr-2 text-blue-500"></i> Descripción detallada</span>
+                        <span id="counter-descripcion" class="char-counter">0 / 250</span>
+                    </label>
+                    <textarea id="descripcion"
+                              name="txt_descripcion" 
+                              class="input-edit-style" 
+                              rows="3" 
+                              placeholder="Describe los alcances del servicio..."
+                              minlength="20"
+                              maxlength="250"
+                              required>{{ servicio.descripcion }}</textarea>
+                </div>
+
+                <div class="section-divider">
+                    <i class="fa-solid fa-handshake"></i> Proveedor Externo Responsable
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="field-group">
+                        <label class="label-edit">
+                            <span><i class="fa-solid fa-building mr-2 text-blue-500"></i> Empresa</span>
+                        </label>
+                        <input type="text" 
+                               name="txt_empresa_externa" 
+                               value="{{ servicio.nombre_empresa_externa }}"
+                               class="input-edit-style" 
+                               placeholder="Ej: Alianzas Logísticas S.A.S.">
+                    </div>
+                    <div class="field-group">
+                        <label class="label-edit">
+                            <span><i class="fa-solid fa-id-card mr-2 text-blue-500"></i> NIT o Cédula</span>
+                        </label>
+                        <input type="text" 
+                               id="txt_nit_proveedor"
+                               name="txt_nit_proveedor" 
+                               value="{{ servicio.nit_o_cedula_proveedor }}"
+                               class="input-edit-style" 
+                               placeholder="Ej: 900123456-2"
+                               minlength="6"
+                               maxlength="20"
+                               pattern="^[A-Za-z0-9\-]{6,20}$"
+                               title="Debe tener entre 6 y 20 caracteres alfanuméricos (se admiten guiones)."
+                               required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="field-group">
+                        <label class="label-edit">
+                            <span><i class="fa-solid fa-user-tie mr-2 text-blue-500"></i> Especialista de Contacto</span>
+                        </label>
+                        <input type="text" 
+                               id="txt_nombre_proveedor"
+                               name="txt_nombre_proveedor" 
+                               value="{{ servicio.nombre_proveedor }}"
+                               class="input-edit-style" 
+                               placeholder="Ej: Juan Pérez"
+                               minlength="3"
+                               maxlength="50"
+                               pattern="^[A-Za-záéíóúÁÉÍÓÚñÑ\s]{3,50}$"
+                               title="Debe ser un nombre propio válido (solo letras) de mínimo 3 caracteres."
+                               required>
+                    </div>
+                    <div class="field-group">
+                        <label class="label-edit">
+                            <span><i class="fa-solid fa-phone mr-2 text-blue-500"></i> Teléfono Directo</span>
+                        </label>
+                        <input type="text" 
+                               id="txt_telefono_proveedor"
+                               name="txt_telefono_proveedor" 
+                               value="{{ servicio.telefono_proveedor }}"
+                               class="input-edit-style" 
+                               placeholder="Ej: 3001234567"
+                               minlength="10"
+                               maxlength="15"
+                               pattern="^\d{10,15}$"
+                               title="El teléfono debe contener únicamente números y tener un mínimo de 10 dígitos."
+                               required>
+                    </div>
+                </div>
+
+                <div class="section-divider">
+                    <i class="fa-solid fa-chart-line"></i> Márgenes y Control Financiero
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="field-group">
+                        <label class="label-edit">
+                            <span><i class="fa-solid fa-money-bill-wave mr-2 text-emerald-600"></i> Costo del Proveedor</span>
+                        </label>
+                        <div class="price-input-container">
+                            <span class="price-symbol">$</span>
+                            <input type="number" 
+                                   id="txt_costo_proveedor"
+                                   step="1" 
+                                   min="0"
+                                   name="txt_costo_proveedor" 
+                                   value="{{ servicio.costo_proveedor|stringformat:'d' }}"
+                                   class="input-edit-style" 
+                                   placeholder="0"
+                                   onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="label-edit">
+                            <span><i class="fa-solid fa-circle-dollar-to-slot mr-2 text-blue-500"></i> Tarifa Cliente</span>
+                        </label>
+                        <div class="price-input-container">
+                            <span class="price-symbol">$</span>
+                            <input type="number" 
+                                   step="1" 
+                                   min="1"
+                                   id="precio"
+                                   name="txt_precio" 
+                                   value="{{ servicio.precio_servicio|stringformat:'d' }}"
+                                   class="input-edit-style" 
+                                   placeholder="0"
+                                   title="Ingrese un valor entero sin decimales, positivo y mayor al costo base."
+                                   onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-group mt-2">
+                    <label class="label-edit">
+                        <span><i class="fa-solid fa-toggle-on mr-2 text-blue-500"></i> Estado de Disponibilidad</span>
+                    </label>
+                    <select id="estado"
+                            name="txt_estado"
+                            class="input-edit-style font-bold text-blue-600"
+                            required>
+                        <option value="A" {% if servicio.estado == 'A' %}selected{% endif %}>🟢 Activo / Visible en Catálogo</option>
+                        <option value="I" {% if servicio.estado == 'I' %}selected{% endif %}>🔴 Inactivo / Oculto del Sistema</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="edit-form-footer">
+                <a href="{% url 'gestionar_catalogos' %}" class="btn-cancel-edit">
+                    Descartar Cambios
+                </a>
+                <button type="submit" class="btn-update">
+                    <i class="fa-solid fa-arrows-rotate text-[10px]"></i>
+                    <span>Actualizar Registro</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const textarea = document.getElementById('descripcion');
+        const counter = document.getElementById('counter-descripcion');
+        const form = document.getElementById('form-editar-servicio');
+        const errorContainer = document.getElementById('js-error-container');
+
+        // Referencias de inputs monetarios
+        const costoProveedorInput = document.getElementById('txt_costo_proveedor');
+        const precioClienteInput = document.getElementById('precio');
+
+        function actualizarContador() {
+            const longitud = textarea.value.length;
+            counter.textContent = `${longitud} / 250`;
+            
+            if (longitud < 20 && longitud > 0) {
+                counter.style.color = '#ef4444'; 
+            } else {
+                counter.style.color = '#94a3b8'; 
+            }
+        }
+
+        textarea.addEventListener('input', actualizarContador);
+        actualizarContador(); 
+
+        // Validación financiera lógica antes de enviar la actualización
+        form.addEventListener('submit', function(event) {
+            let errores = [];
+            errorContainer.classList.add('hidden');
+            errorContainer.innerHTML = '';
+
+            const costoProveedor = parseInt(costoProveedorInput.value) || 0;
+            const precioCliente = parseInt(precioClienteInput.value) || 0;
+
+            // 1. Control riguroso contra negativos
+            if (costoProveedor < 0 || precioCliente < 0) {
+                errores.push("Los valores económicos no pueden ser negativos.");
+            }
+
+            // 2. Validación de margen de ganancia o pérdida
+            if (precioCliente === costoProveedor) {
+                errores.push("La tarifa del cliente no puede ser exactamente igual al costo del proveedor (El margen de utilidad sería cero).");
+                precioClienteInput.classList.add('border-red-500', 'bg-red-50');
+            } else if (precioCliente < costoProveedor) {
+                errores.push("La tarifa del cliente no puede ser menor que el costo del proveedor (Provocaría pérdidas financieras).");
+                precioClienteInput.classList.add('border-red-500', 'bg-red-50');
+            } else {
+                precioClienteInput.classList.remove('border-red-500', 'bg-red-50');
+            }
+
+            // Freno del envío e inyección de alertas si existen errores
+            if (errores.length > 0) {
+                event.preventDefault();
+                errorContainer.innerHTML = errores.join('<br>');
+                errorContainer.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    });
+</script>
+{% endblock %}

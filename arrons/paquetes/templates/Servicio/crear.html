@@ -1,0 +1,404 @@
+{% extends 'base2.html' %}
+
+{% block content %}
+<style>
+    /* Contenedor tipo Tarjeta de Servicio alineado al Catálogo */
+    .service-form-card {
+        background: white;
+        border-radius: 2rem; 
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+        border: 1px solid #f1f5f9;
+        max-width: 650px; 
+        margin: 2rem auto;
+        overflow: hidden;
+    }
+
+    .form-header {
+        background: #2563eb; 
+        padding: 2.5rem 2rem;
+        text-align: center;
+        color: white;
+        position: relative;
+    }
+
+    .form-header::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: linear-gradient(to top, rgba(255,255,255,0.1), transparent);
+    }
+
+    .form-content {
+        padding: 2.5rem;
+    }
+
+    .section-divider {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #2563eb;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin: 2rem 0 1.2rem 0;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px dashed #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .label-style {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.7rem;
+        font-weight: 900;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 0.6rem;
+        letter-spacing: 0.15em;
+    }
+
+    .input-style {
+        width: 100%;
+        padding: 0.9rem 1.2rem;
+        border: 2px solid #f1f5f9;
+        border-radius: 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: #1e293b;
+        background: #f8fafc;
+    }
+
+    .input-style:focus {
+        outline: none;
+        border-color: #2563eb;
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.06);
+    }
+
+    .input-style:user-invalid {
+        border-color: #ef4444;
+        background-color: #fef2f2;
+    }
+
+    .price-wrapper {
+        position: relative;
+    }
+
+    .price-wrapper::before {
+        content: '$';
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-weight: 900;
+        font-size: 0.9rem;
+    }
+
+    .price-wrapper .input-style {
+        padding-left: 2.2rem;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .btn-cancel {
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: #9ca3af;
+        transition: color 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        color: #4b5563;
+    }
+
+    .btn-save {
+        background: #2563eb;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 9999px; 
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        transition: all 0.3s;
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-save:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.3);
+    }
+
+    .char-counter {
+        font-size: 0.65rem;
+        color: #94a3b8;
+        font-weight: bold;
+        text-transform: none;
+        letter-spacing: normal;
+    }
+
+    .contenedor-main { background: transparent !important; box-shadow: none !important; }
+</style>
+
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div id="js-error-container" class="hidden mb-4 p-4 rounded-xl bg-red-50 text-red-700 border border-red-200 text-sm font-bold shadow-sm"></div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mb-4 p-4 rounded-xl {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %} text-sm font-bold shadow-sm">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="service-form-card">
+        <div class="form-header">
+            <div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/30 shadow-lg">
+                <i class="fa-solid fa-bell-concierge text-2xl text-white"></i>
+            </div>
+            <h1 class="text-2xl font-black tracking-tighter uppercase">
+                Nuevo <span class="opacity-80">Servicio Tercerizado</span>
+            </h1>
+            <p class="text-blue-100 text-[10px] font-bold uppercase tracking-widest mt-1">Configuración de catálogo y trazabilidad externa</p>
+        </div>
+
+        <form action="{% url 'registrar_servicio' %}" method="post" id="form-servicio" class="form-content">
+            {% csrf_token %}
+            
+            <div class="section-divider">
+                <i class="fa-solid fa-circle-info"></i> Información Comercial del Servicio
+            </div>
+
+            <div class="mb-4">
+                <label class="label-style">
+                    <span><i class="fa-solid fa-tag mr-2 text-blue-500"></i> Nombre del Servicio</span>
+                </label>
+                <input type="text" 
+                       name="txt_nombre" 
+                       id="txt_nombre"
+                       value="{{ valores_previos.nombre|default:'' }}"
+                       class="input-style" 
+                       placeholder="Ej: Fotografía Profesional"
+                       minlength="2"
+                       maxlength="50"
+                       pattern="^[A-Za-záéíóúÁÉÍÓÚñÑ0-9\s]{2,50}$"
+                       title="El nombre debe tener mínimo 2 caracteres (letras, números o espacios)."
+                       required>
+            </div>
+
+            <div class="mb-4">
+                <label class="label-style">
+                    <span><i class="fa-solid fa-quote-left mr-2 text-blue-500"></i> Descripción detallada</span>
+                    <span id="counter-descripcion" class="char-counter">0 / 250</span>
+                </label>
+                <textarea name="txt_descripcion" 
+                          id="txt_descripcion"
+                          class="input-style" 
+                          rows="3" 
+                          placeholder="Describe qué incluye este servicio de manera detallada (mínimo 20 caracteres)..."
+                          minlength="20"
+                          maxlength="250"
+                          required>{{ valores_previos.descripcion|default:'' }}</textarea>
+            </div>
+
+            <div class="section-divider">
+                <i class="fa-solid fa-handshake"></i> Datos de la Empresa / Especialista Externo
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="label-style">
+                        <span><i class="fa-solid fa-building mr-2 text-blue-500"></i> Empresa (Opcional)</span>
+                    </label>
+                    <input type="text" 
+                           name="txt_empresa_externa" 
+                           value="{{ valores_previos.empresa_externa|default:'' }}"
+                           class="input-style" 
+                           placeholder="Ej: Sonido Bogotá S.A.S.">
+                </div>
+                <div>
+                    <label class="label-style">
+                        <span><i class="fa-solid fa-id-card mr-2 text-blue-500"></i> NIT o Cédula</span>
+                    </label>
+                    <input type="text" 
+                           name="txt_nit_proveedor" 
+                           id="txt_nit_proveedor"
+                           value="{{ valores_previos.nit_proveedor|default:'' }}"
+                           class="input-style" 
+                           placeholder="Ej: 901234567-1"
+                           minlength="6"
+                           maxlength="20"
+                           pattern="^[A-Za-z0-9\-]{6,20}$"
+                           title="Debe tener entre 6 y 20 caracteres alfanuméricos (se admiten guiones)."
+                           required>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="label-style">
+                        <span><i class="fa-solid fa-user-tie mr-2 text-blue-500"></i> Contacto Responsable</span>
+                    </label>
+                    <input type="text" 
+                           name="txt_nombre_proveedor" 
+                           id="txt_nombre_proveedor"
+                           value="{{ valores_previos.nombre_proveedor|default:'' }}"
+                           class="input-style" 
+                           placeholder="Ej: Carlos Mendoza"
+                           minlength="3"
+                           maxlength="50"
+                           pattern="^[A-Za-záéíóúÁÉÍÓÚñÑ\s]{3,50}$"
+                           title="Debe ser un nombre propio válido (solo letras) de mínimo 3 caracteres."
+                           required>
+                </div>
+                <div>
+                    <label class="label-style">
+                        <span><i class="fa-solid fa-phone mr-2 text-blue-500"></i> Teléfono Directo</span>
+                    </label>
+                    <input type="text" 
+                           name="txt_telefono_proveedor" 
+                           id="txt_telefono_proveedor"
+                           value="{{ valores_previos.telefono_proveedor|default:'' }}"
+                           class="input-style" 
+                           placeholder="Ej: 3157654321"
+                           minlength="10"
+                           maxlength="15"
+                           pattern="^\d{10,15}$"
+                           title="El teléfono debe contener únicamente números y tener un mínimo de 10 dígitos."
+                           required>
+                </div>
+            </div>
+
+            <div class="section-divider">
+                <i class="fa-solid fa-chart-line"></i> Control de Costes y Precios
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="label-style">
+                        <span><i class="fa-solid fa-money-bill-wave mr-2 text-emerald-600"></i> Costo del Proveedor</span>
+                    </label>
+                    <div class="price-wrapper">
+                        <input type="number" 
+                               step="1" 
+                               min="0"
+                               name="txt_costo_proveedor" 
+                               id="txt_costo_proveedor"
+                               value="{{ valores_previos.costo_proveedor|default:'0' }}"
+                               class="input-style" 
+                               placeholder="Lo que cobra el externo"
+                               onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                               required>
+                    </div>
+                </div>
+                <div>
+                    <label class="label-style">
+                        <span><i class="fa-solid fa-circle-dollar-to-slot mr-2 text-blue-500"></i> Precio Venta Cliente</span>
+                    </label>
+                    <div class="price-wrapper">
+                        <input type="number" 
+                               step="1" 
+                               min="1"
+                               name="txt_precio" 
+                               id="txt_precio"
+                               value="{{ valores_previos.precio|default:'' }}"
+                               class="input-style" 
+                               placeholder="Lo que paga el cliente"
+                               title="Ingrese un valor entero sin decimales, positivo y mayor al costo base"
+                               onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                               required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <a href="{% url 'gestionar_catalogos' %}" class="btn-cancel text-[10px] font-black uppercase tracking-[0.2em]">
+                    Cerrar
+                </a>
+                <button type="submit" class="btn-save flex items-center">
+                    <span>Guardar Servicio</span>
+                    <i class="fa-solid fa-arrow-right ml-3 text-[8px]"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const textarea = document.getElementById('txt_descripcion');
+        const counter = document.getElementById('counter-descripcion');
+        const form = document.getElementById('form-servicio');
+        const errorContainer = document.getElementById('js-error-container');
+
+        // Campos numéricos y de costos
+        const costoProveedorInput = document.getElementById('txt_costo_proveedor');
+        const precioClienteInput = document.getElementById('txt_precio');
+
+        function actualizarContador() {
+            const longitud = textarea.value.length;
+            counter.textContent = `${longitud} / 250`;
+            
+            if (longitud < 20 && longitud > 0) {
+                counter.style.color = '#ef4444'; 
+            } else {
+                counter.style.color = '#94a3b8'; 
+            }
+        }
+
+        textarea.addEventListener('input', actualizarContador);
+        actualizarContador(); 
+
+        // Validación de lógica financiera y bloqueo de negativos antes de enviar
+        form.addEventListener('submit', function(event) {
+            let errores = [];
+            errorContainer.classList.add('hidden');
+            errorContainer.innerHTML = '';
+
+            const costoProveedor = parseInt(costoProveedorInput.value) || 0;
+            const precioCliente = parseInt(precioClienteInput.value) || 0;
+
+            // 1. Control estricto de números negativos
+            if (costoProveedor < 0 || precioCliente < 0) {
+                errores.push("Los valores económicos no pueden ser negativos.");
+            }
+
+            // 2. Validación de margen comercial solicitado
+            if (precioCliente === costoProveedor) {
+                errores.push("El precio de venta al cliente no puede ser exactamente igual al costo base del proveedor (No dejaría ganancias).");
+                precioClienteInput.classList.add('border-red-500', 'bg-red-50');
+            } else if (precioCliente < costoProveedor) {
+                errores.push("El precio de venta al cliente no puede ser menor que el costo del proveedor (Generaría pérdidas directas).");
+                precioClienteInput.classList.add('border-red-500', 'bg-red-50');
+            } else {
+                precioClienteInput.classList.remove('border-red-500', 'bg-red-50');
+            }
+
+            // Si hay errores, frenar envío e inyectar panel de aviso superior
+            if (errores.length > 0) {
+                event.preventDefault();
+                errorContainer.innerHTML = errores.join('<br>');
+                errorContainer.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    });
+</script>
+{% endblock %}
