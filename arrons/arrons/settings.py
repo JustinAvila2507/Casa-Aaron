@@ -80,15 +80,16 @@ WSGI_APPLICATION = 'arrons.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-'default': {
-'ENGINE': 'django.db.backends.mysql',
-'NAME': os.getenv('MYSQLDATABASE'),
-'USER': os.getenv('MYSQLUSER'),
-'PASSWORD': os.getenv('MYSQLPASSWORD'),
-'HOST': os.getenv('MYSQLHOST'),
-'PORT': os.getenv('MYSQLPORT'),
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('MYSQLDATABASE'),
+        'USER': os.getenv('MYSQLUSER'),
+        'PASSWORD': os.getenv('MYSQLPASSWORD'),
+        'HOST': os.getenv('MYSQLHOST'),
+        'PORT': os.getenv('MYSQLPORT'),
+    }
 }
-}
+
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
