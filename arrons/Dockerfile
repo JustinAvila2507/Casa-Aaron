@@ -1,6 +1,6 @@
 FROM python:3.12-slim
 
-# Instalar las librerías del sistema que pide WeasyPrint a gritos
+# 1. Instalar las librerías del sistema operativo que WeasyPrint necesita para los reportes
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     python3-dev \
@@ -18,12 +18,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Copiar e instalar dependencias de Python
-COPY requirements.txt .
+# 2. Copiar e instalar los requerimientos de Python
+# Apuntamos a la ruta real de tu archivo dentro del repositorio
+COPY Proyecto_Arron_Django/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar el resto del proyecto
+# 3. Copiar todo el proyecto al servidor
 COPY . .
 
-# Comando para ejecutar la aplicación usando la ruta correcta
-CMD ["gunicorn", "Proyecto_Arron_Django.arrons.wsgi:application", "--bind", "0.0.0.0:$PORT"]
+# 4. Cambiar el directorio de trabajo a donde está el manage.py para que los comandos funcionen directo
+WORKDIR /app/Proyecto_Arron_Django
+
+# 5. Comando para arrancar el servidor con Gunicorn apuntando al WSGI correcto
+CMD ["gunicorn", "arrons.wsgi:application", "--bind", "0.0.0.0:$PORT"]
